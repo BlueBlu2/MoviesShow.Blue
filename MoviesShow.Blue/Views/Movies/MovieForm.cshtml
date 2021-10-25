@@ -1,0 +1,110 @@
+﻿@model MovieFormViewModel
+
+@{ 
+    ViewData["Title"] = "Movie Form";
+}
+
+<h2>@(Model.Id!=Guid.Empty?"Edit":"Create") Movie</h2>
+
+<hr />
+
+<section class="row">
+    <div class="mx-auto col-md-10">
+        <form method="post" asp-action="@(Model.Id!=Guid.Empty?"Edit":"Create")" enctype="multipart/form-data">
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <div class="row">
+                    <label class="text-muted col-form-label-lg align-middle col-md-2" asp-for="Title"></label>
+                    <input type="text" class="form-control col-md-10" asp-for="Title" maxlength="250" />
+                </div>
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <label class="text-muted col-form-label-lg align-middle col-md-2" asp-for="GenreId"></label>
+                    <select class="form-control col-md-10" asp-for="GenreId" asp-items="@(new SelectList(Model.Genres, "Id","Name"))">
+                        <option></option>
+                    </select>
+                </div>
+                <span asp-validation-for="GenreId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <label class="text-muted col-form-label-lg align-middle col-md-2" asp-for="Year"></label>
+                    <input type="number" class="form-control w-25" asp-for="Year" value="@(string.IsNullOrEmpty(Model.Year) ?string.Empty:Model.Year)" />
+                </div>
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <label class="text-muted col-form-label-lg align-middle col-md-2" asp-for="Rate"></label>
+                    <input type="number" class="form-control w-25" asp-for="Rate" value="@(Model.Rate > 0 ?Model.Rate : string.Empty)" />
+                </div>
+                <span asp-validation-for="Rate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <label class="text-muted col-form-label-lg align-middle col-md-2" asp-for="StoryLine"></label>
+                    <textarea class="form-control col-md-10" asp-for="StoryLine" maxlength="2500"></textarea>
+                </div>
+                <span asp-validation-for="StoryLine" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <label class="text-muted col-form-label-lg align-middle col-md-2" asp-for="Poster"></label>
+                    <div class="custom-file w-25">
+                        <input type="file" class="custom-file-input" asp-for="Poster"  accept=".png, .jpg"/>
+                        <label class="custom-file-label">Select...</label>
+                        <span asp-validation-for="Poster" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div id="poster-container" class="col-md-8 mx-auto @(Model.Id!=Guid.Empty? string.Empty:"d-none")" >
+                <img src="@(Model.Id!=Guid.Empty? $"data:image/*;base64,{Convert.ToBase64String(Model.Poster)}":string.Empty)" alt="Poster" class="img-thumbnail"/>
+            </div>
+            <div class="row mt-4  float-md-right">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check"></i>
+                    Save
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-x"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts{ 
+     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script>
+
+    const imageNameChange = (elm) => {
+        let selectedName = $(elm).val().split('\\').pop();
+        $(elm).siblings('label').text(selectedName);
+    }
+
+    const imageDisplay = (elm) => {
+        let posteContainer = $('#poster-container');
+        let image = window.URL.createObjectURL(elm.files[0]);
+
+        posteContainer.removeClass('d-none');
+        posteContainer.find('img').attr('src', image);
+    }
+
+    $(document).ready(() => {
+        $('#Poster').on('change', function () {
+            imageNameChange(this);
+            imageDisplay(this);
+        })
+    });
+
+    $('#Year').datepicker({
+        format: 'yyyy',
+        viewMode: 'years',
+        minViewMode: 'years',
+        autoclose: true,
+        startDate: new Date('1920-01-01'),
+        endDate: new Date()
+    });
+</script>
+}
